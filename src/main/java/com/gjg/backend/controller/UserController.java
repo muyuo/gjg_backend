@@ -82,6 +82,30 @@ public class UserController {
         return response;
     }
 
+    @GetMapping("user/profile/{id}")
+    public @ResponseBody Response getUserById(@PathVariable String id) {
+        Response response = new Response();
+        Integer index = BackendApplication.memory.indexMap.get(UUID.fromString(id));
+
+        if (index == null) {
+            response.setCode("500");
+            response.setMessage("User not found.");
+            return response;
+        }
+
+        User user = BackendApplication.memory.getUsers().get(index);
+        UserProfileRespond profileRespond = new UserProfileRespond();
+        profileRespond.user_id = user.getId();
+        profileRespond.display_name = user.getDisplay_name();
+        profileRespond.points = user.getPoints();
+        profileRespond.rank = index + 1;
+
+        response.setCode("200");
+        response.setMessage("ok");
+        response.setData(profileRespond);
+        return response;
+    }
+
     @PostConstruct
     public void readAllUsersOnStartup() {
         Iterator<User> iterator = userRepository.findAll().iterator();
