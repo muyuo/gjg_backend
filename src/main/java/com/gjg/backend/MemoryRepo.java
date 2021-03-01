@@ -32,20 +32,20 @@ public class MemoryRepo {
     public synchronized void updatePointsOfUser (UUID userId, double gainedScore) {
         int index = indexMap.get(userId);
         User user = users.get(index);
-        user.setPoints(user.getPoints() + gainedScore);
 
         if (user == null) {
             new Throwable("user not found. user_id: " + userId.toString()).printStackTrace();
             return;
         }
+        user.setPoints(user.getPoints() + gainedScore);
 
-        removeUser(index);
+
         int newPosition = updateUserPosition(0, index, user);
         if (newPosition == -1) {
             new Throwable("Sort error.").printStackTrace();
             return;
         }
-
+        removeUser(index);
         updateIndexMap(newPosition, index);
     }
 
