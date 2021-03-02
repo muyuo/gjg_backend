@@ -33,6 +33,7 @@ public class UserController {
             newUser.setId(UUID.fromString(userObj.user_id));
             newUser.setDisplay_name(userObj.display_name);
             newUser.setPoints(userObj.points);
+            newUser.setCountry(userObj.country);
 
             BackendApplication.memory.addUser(newUser);
             Scanner.addTask(new Task(newUser, this::saveUserToDb, "create_user"));

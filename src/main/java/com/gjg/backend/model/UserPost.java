@@ -5,4 +5,5 @@ public class UserPost {
     public String display_name;
     public double points;
     public int rank;
+    public String country;
 }

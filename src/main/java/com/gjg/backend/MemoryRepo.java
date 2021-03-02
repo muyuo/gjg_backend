@@ -1,10 +1,14 @@
 package com.gjg.backend;
 
+import com.gjg.backend.model.Leaderboard;
+import com.gjg.backend.model.LeaderboardResponse;
 import com.gjg.backend.model.User;
 
 import java.util.*;
 
 public class MemoryRepo {
+    private static final int USER_PER_PAGE = 10;
+
     public HashMap<UUID, Integer> indexMap = new HashMap<>();
     private List<User> users = Collections.synchronizedList(new LinkedList<>());
 
@@ -75,6 +79,39 @@ public class MemoryRepo {
             addUser(index, user);
             return index;
         }
+    }
+
+    public LeaderboardResponse getLeaderboard(int page, String country) {
+        int userCount = 0;
+        int index = (page - 1) * USER_PER_PAGE;
+
+        LeaderboardResponse leaderboardResponse = new LeaderboardResponse();
+        leaderboardResponse.leaderboard = new ArrayList<>(10);
+
+        while (userCount < USER_PER_PAGE && index < users.size()) {
+
+            User user = users.get(index++);
+            if (country == null || user.getCountry().equals(country)) {
+            Leaderboard leaderboardItem = new Leaderboard();
+            leaderboardItem.rank = index;
+            leaderboardItem.points = user.getPoints();
+            leaderboardItem.display_name = user.getDisplay_name();
+            leaderboardItem.country = user.getCountry();
+
+
+            leaderboardResponse.leaderboard.add(leaderboardItem);
+            userCount++;
+            }
+        }
+
+        leaderboardResponse.page = page;
+        leaderboardResponse.last_page = index >= users.size();
+
+        return leaderboardResponse;
+    }
+
+    public LeaderboardResponse getUsersByPage(int page) {
+        return getLeaderboard(page, null);
     }
 
     public void removeUser(UUID userID) {
