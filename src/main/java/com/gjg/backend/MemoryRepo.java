@@ -49,21 +49,14 @@ public class MemoryRepo {
             new Throwable("Sort error.").printStackTrace();
             return;
         }
-        removeUser(index);
+        removeUser(index + 1);
         updateIndexMap(newPosition, index);
     }
 
     public int updateUserPosition(int topIndex, int usersIndex, User user) {
-        if (usersIndex == topIndex) {
-            addUser(usersIndex, user);
-            return usersIndex;
-        } else if (usersIndex < topIndex) {
-            if (usersIndex < 0) {
-                addUser(0, user);
-                return 0;
-            } else {
-                return -1;
-            }
+        if (usersIndex < topIndex) {
+            addUser(topIndex, user);
+            return topIndex;
         }
 
         int index = topIndex + (usersIndex - topIndex) / 2;
