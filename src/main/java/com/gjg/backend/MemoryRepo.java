@@ -32,7 +32,7 @@ public class MemoryRepo {
         return users;
     }
 
-    public synchronized void updatePointsOfUser (UUID userId, double gainedScore) {
+    public synchronized void updatePointsOfUser(UUID userId, double gainedScore) {
         int index = indexMap.get(userId);
         User user = users.get(index);
 
@@ -64,7 +64,7 @@ public class MemoryRepo {
 
         if (user.getPoints() > userToCompare.getPoints()) {
             return updateUserPosition(topIndex, index - 1, user);
-        } else  if (user.getPoints() < userToCompare.getPoints()) {
+        } else if (user.getPoints() < userToCompare.getPoints()) {
             return updateUserPosition(index + 1, usersIndex, user);
         } else {
             // equal state.
@@ -76,16 +76,25 @@ public class MemoryRepo {
     public LeaderboardResponse getLeaderboard(int page, String country) {
         int userCount = 0;
         int index = (page - 1) * USER_PER_PAGE;
+        List<User> listForIterate;
 
         LeaderboardResponse leaderboardResponse = new LeaderboardResponse();
         leaderboardResponse.leaderboard = new ArrayList<>(10);
 
-        while (userCount < USER_PER_PAGE && index < users.size()) {
 
-            User user = users.get(index++);
-            if (country == null || user.getCountry().equals(country)) {
+        if (country != null) {
+            listForIterate = getUsersByCountry(country);
+        } else {
+            listForIterate = users;
+        }
+
+        leaderboardResponse.total_page = (int) Math.ceil(listForIterate.size() / USER_PER_PAGE);
+
+        while (userCount < USER_PER_PAGE && index < listForIterate.size()) {
+
+            User user = listForIterate.get(index++);
             Leaderboard leaderboardItem = new Leaderboard();
-            leaderboardItem.rank = index;
+            leaderboardItem.rank = indexMap.get(user.getId()) + 1;
             leaderboardItem.points = user.getPoints();
             leaderboardItem.display_name = user.getDisplay_name();
             leaderboardItem.country = user.getCountry();
@@ -93,7 +102,6 @@ public class MemoryRepo {
 
             leaderboardResponse.leaderboard.add(leaderboardItem);
             userCount++;
-            }
         }
 
         leaderboardResponse.page = page;
@@ -104,6 +112,18 @@ public class MemoryRepo {
 
     public LeaderboardResponse getUsersByPage(int page) {
         return getLeaderboard(page, null);
+    }
+
+    private List<User> getUsersByCountry(String country) {
+        List<User> userListByCounty = new ArrayList<>();
+
+        for (User user : users) {
+            if (user.getCountry().equals(country)) {
+                userListByCounty.add(user);
+            }
+        }
+
+        return userListByCounty;
     }
 
     public void removeUser(UUID userID) {
