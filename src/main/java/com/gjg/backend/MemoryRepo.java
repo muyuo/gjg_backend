@@ -14,7 +14,6 @@ public class MemoryRepo {
 
     public void addUser(User user) {
         users.add(user);
-        user.setRank(users.size());
         indexMap.put(user.getId(), users.size() - 1);
     }
 

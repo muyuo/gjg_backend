@@ -16,9 +16,6 @@ public class User {
     private String country;
     private double points;
 
-    @Transient
-    private int rank;
-
     public UUID getId() {
         return id;
     }
@@ -49,13 +46,5 @@ public class User {
 
     public void setPoints(double points) {
         this.points = points;
-    }
-
-    public int getRank() {
-        return rank;
-    }
-
-    public void setRank(int rank) {
-        this.rank = rank;
     }
 }
