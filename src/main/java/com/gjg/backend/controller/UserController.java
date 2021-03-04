@@ -95,10 +95,7 @@ public class UserController {
         }
 
         Scanner.addTask(new Task(BackendApplication.memory.getUsers().get(index), this::saveUserToDb, "Score update"));
-        BackendApplication.memory.updatePointsOfUser(UUID.fromString(scoreBody.user_id), scoreBody.score_worth);
-
-        response.setCode("200");
-        response.setMessage("ok");
+        response = BackendApplication.memory.updatePointsOfUser(UUID.fromString(scoreBody.user_id), scoreBody.score_worth);
 
         return response;
     }

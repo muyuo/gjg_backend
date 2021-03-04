@@ -1,8 +1,6 @@
 package com.gjg.backend;
 
-import com.gjg.backend.model.Leaderboard;
-import com.gjg.backend.model.LeaderboardResponse;
-import com.gjg.backend.model.User;
+import com.gjg.backend.model.*;
 
 import java.util.*;
 
@@ -32,13 +30,16 @@ public class MemoryRepo {
         return users;
     }
 
-    public synchronized void updatePointsOfUser(UUID userId, double gainedScore) {
+    public synchronized Response updatePointsOfUser(UUID userId, double gainedScore) {
+        Response response = new Response();
         int index = indexMap.get(userId);
         User user = users.get(index);
 
         if (user == null) {
             new Throwable("user not found. user_id: " + userId.toString()).printStackTrace();
-            return;
+            response.setMessage("500");
+            response.setMessage("User not found");
+            return response;
         }
         user.setPoints(user.getPoints() + gainedScore);
 
@@ -46,10 +47,22 @@ public class MemoryRepo {
         int newPosition = updateUserPosition(0, index, user);
         if (newPosition == -1) {
             new Throwable("Sort error.").printStackTrace();
-            return;
+            response.setMessage("500");
+            response.setMessage("Internal server error");
+            return response;
         }
         removeUser(index + 1);
         updateIndexMap(newPosition, index);
+
+        ScoreSubmitResponse scoreSubmitResponse = new ScoreSubmitResponse();
+        scoreSubmitResponse.user_id = userId.toString();
+        scoreSubmitResponse.rank_change = index - newPosition;
+        scoreSubmitResponse.total_score = user.getPoints();
+        response.setCode("200");
+        response.setMessage("ok");
+        response.setData(scoreSubmitResponse);
+
+        return response;
     }
 
     public int updateUserPosition(int topIndex, int usersIndex, User user) {
@@ -105,7 +118,7 @@ public class MemoryRepo {
         }
 
         leaderboardResponse.page = page;
-        leaderboardResponse.last_page = index >= users.size();
+        leaderboardResponse.last_page = leaderboardResponse.total_page <= page;
 
         return leaderboardResponse;
     }
