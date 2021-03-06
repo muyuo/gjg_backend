@@ -86,7 +86,7 @@ public class UserController {
 
             newUser.setPoints(0);
             BackendApplication.memory.addUser(newUser);
-            BackendApplication.memory.updatePointsOfUser(newUser.getId(), userObj.points);
+            BackendApplication.memory.updatePointsOfUser(newUser.getId(), userObj.points, null);
 
 
             UserCreateRespond userRespond = new UserCreateRespond();
@@ -123,8 +123,7 @@ public class UserController {
             return response;
         }
 
-        Scanner.addTask(new Task(BackendApplication.memory.getUsers().get(index), this::saveUserToDb, "Score update"));
-        response = BackendApplication.memory.updatePointsOfUser(UUID.fromString(scoreBody.user_id), scoreBody.score_worth);
+        response = BackendApplication.memory.updatePointsOfUser(UUID.fromString(scoreBody.user_id), scoreBody.score_worth, this);
 
         return response;
     }

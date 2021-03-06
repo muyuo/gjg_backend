@@ -1,5 +1,6 @@
 package com.gjg.backend;
 
+import com.gjg.backend.controller.UserController;
 import com.gjg.backend.model.*;
 
 import java.util.*;
@@ -30,7 +31,7 @@ public class MemoryRepo {
         return users;
     }
 
-    public synchronized Response updatePointsOfUser(UUID userId, double gainedScore) {
+    public synchronized Response updatePointsOfUser(UUID userId, double gainedScore, UserController controllerClass) {
         Response response = new Response();
         int index = indexMap.get(userId);
         User user = users.get(index);
@@ -52,6 +53,10 @@ public class MemoryRepo {
             return response;
         }
         user.setPoints(user.getPoints() + gainedScore);
+
+        if (controllerClass != null) {
+            Scanner.addTask(new Task(user, controllerClass::saveUserToDb, "Score Update"));
+        }
 
 
         int newPosition = updateUserPosition(0, index, user);
