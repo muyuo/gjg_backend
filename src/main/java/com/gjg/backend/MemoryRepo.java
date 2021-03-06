@@ -34,10 +34,20 @@ public class MemoryRepo {
         Response response = new Response();
         int index = indexMap.get(userId);
         User user = users.get(index);
+        ScoreSubmitResponse scoreSubmitResponse = new ScoreSubmitResponse();
+
+        if (gainedScore == 0) {
+            response.setCode("200");
+            response.setMessage("ok");
+            scoreSubmitResponse.user_id = userId.toString();
+            scoreSubmitResponse.rank_change = 0;
+            scoreSubmitResponse.total_score = user.getPoints();
+            return response;
+        }
 
         if (user == null) {
             new Throwable("user not found. user_id: " + userId.toString()).printStackTrace();
-            response.setMessage("500");
+            response.setCode("500");
             response.setMessage("User not found");
             return response;
         }
@@ -47,14 +57,13 @@ public class MemoryRepo {
         int newPosition = updateUserPosition(0, index, user);
         if (newPosition == -1) {
             new Throwable("Sort error.").printStackTrace();
-            response.setMessage("500");
+            response.setCode("500");
             response.setMessage("Internal server error");
             return response;
         }
         removeUser(index + 1);
         updateIndexMap(newPosition, index);
 
-        ScoreSubmitResponse scoreSubmitResponse = new ScoreSubmitResponse();
         scoreSubmitResponse.user_id = userId.toString();
         scoreSubmitResponse.rank_change = index - newPosition;
         scoreSubmitResponse.total_score = user.getPoints();
@@ -101,7 +110,7 @@ public class MemoryRepo {
             listForIterate = users;
         }
 
-        leaderboardResponse.total_page = (int) Math.ceil(listForIterate.size() / USER_PER_PAGE);
+        leaderboardResponse.total_page = (int) Math.ceil(listForIterate.size() / (float) USER_PER_PAGE);
 
         while (userCount < USER_PER_PAGE && index < listForIterate.size()) {
 
@@ -109,7 +118,7 @@ public class MemoryRepo {
             Leaderboard leaderboardItem = new Leaderboard();
             leaderboardItem.rank = indexMap.get(user.getId()) + 1;
             leaderboardItem.points = user.getPoints();
-            leaderboardItem.display_name = user.getDisplay_name();
+            leaderboardItem.display_name = user.getDisplayName();
             leaderboardItem.country = user.getCountry();
 
 

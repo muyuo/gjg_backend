@@ -58,21 +58,50 @@ public class UserController {
         Response response = new Response();
 
         try {
+            if (userRepository.existsByDisplayName(userObj.display_name)) {
+                response.setCode("500");
+                response.setMessage("Display name already taken.");
+                return response;
+            }
+
+            if (userObj.points < 0) {
+                response.setCode("500");
+                response.setMessage("Point must be greater than 0");
+                return response;
+            }
+
+            if (userObj.display_name.trim().equals("")) {
+                response.setCode("500");
+                response.setMessage("Display name cannot be empty.");
+                return response;
+            }
+
             User newUser = new User();
             newUser.setId(UUID.fromString(userObj.user_id));
-            newUser.setDisplay_name(userObj.display_name);
+            newUser.setDisplayName(userObj.display_name);
             newUser.setPoints(userObj.points);
             newUser.setCountry(userObj.country);
+            userRepository.save(newUser);
 
+
+            newUser.setPoints(0);
             BackendApplication.memory.addUser(newUser);
-            Scanner.addTask(new Task(newUser, this::saveUserToDb, "create_user"));
+            BackendApplication.memory.updatePointsOfUser(newUser.getId(), userObj.points);
+
+
+            UserCreateRespond userRespond = new UserCreateRespond();
+            userRespond.user_id = userObj.user_id;
+            userRespond.country = userObj.country;
+            userRespond.rank = BackendApplication.memory.indexMap.get(newUser.getId()) + 1;
+            userRespond.display_name = userObj.display_name;
+            userRespond.points = userObj.points;
             response.setCode("200");
             response.setMessage("ok");
-            response.setData(newUser);
+            response.setData(userRespond);
         } catch (Exception e) {
             e.printStackTrace();
             response.setCode("500");
-            response.setMessage("Fail");
+            response.setMessage("fail");
         }
         return response;
     }
@@ -117,7 +146,7 @@ public class UserController {
             user.setId(UUID.randomUUID());
             user.setPoints(0);
             user.setCountry(seedRequestBody.country);
-            user.setDisplay_name(faker.funnyName().name());
+            user.setDisplayName(faker.funnyName().name());
 
             BackendApplication.memory.addUser(user);
             userRepository.save(user);
@@ -159,7 +188,7 @@ public class UserController {
         User user = BackendApplication.memory.getUsers().get(index);
         UserProfileRespond profileRespond = new UserProfileRespond();
         profileRespond.user_id = user.getId();
-        profileRespond.display_name = user.getDisplay_name();
+        profileRespond.display_name = user.getDisplayName();
         profileRespond.points = user.getPoints();
         profileRespond.rank = index + 1;
 

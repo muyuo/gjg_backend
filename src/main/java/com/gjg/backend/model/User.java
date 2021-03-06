@@ -4,7 +4,6 @@ package com.gjg.backend.model;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Transient;
 import java.util.UUID;
 
 @Entity
@@ -12,7 +11,8 @@ public class User {
     @Id
     @Column(columnDefinition = "BINARY(16)")
     private UUID id;
-    private String display_name;
+    @Column(unique = true, name = "display_name")
+    private String displayName;
     private String country;
     private double points;
 
@@ -24,12 +24,12 @@ public class User {
         this.id = id;
     }
 
-    public String getDisplay_name() {
-        return display_name;
+    public String getDisplayName() {
+        return displayName;
     }
 
-    public void setDisplay_name(String display_name) {
-        this.display_name = display_name;
+    public void setDisplayName(String display_name) {
+        this.displayName = display_name;
     }
 
     public String getCountry() {
