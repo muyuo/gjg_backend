@@ -146,7 +146,11 @@ public class UserController {
             user.setId(UUID.randomUUID());
             user.setPoints(0);
             user.setCountry(seedRequestBody.country);
-            user.setDisplayName(faker.funnyName().name());
+            user.setDisplayName(faker.name().fullName());
+
+            while(userRepository.existsByDisplayName(user.getDisplayName())) {
+                user.setDisplayName(user.getDisplayName() + i);
+            }
 
             BackendApplication.memory.addUser(user);
             userRepository.save(user);
