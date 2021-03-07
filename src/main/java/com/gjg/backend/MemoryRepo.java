@@ -116,6 +116,7 @@ public class MemoryRepo {
             Leaderboard leaderboardItem = new Leaderboard();
             leaderboardItem.rank = users.indexOf(user) + 1;
             leaderboardItem.points = user.getPoints();
+            leaderboardItem.user_id = user.getId().toString();
             leaderboardItem.display_name = user.getDisplayName();
             leaderboardItem.country = user.getCountry();
 
