@@ -42,7 +42,7 @@ public class UserController {
 
         for (int i = 0; i < BackendApplication.memory.getUsers().size(); i++) {
             User user = BackendApplication.memory.getUsers().get(i);
-            BackendApplication.memory.indexMap.put(user.getId(), i);
+            BackendApplication.memory.indexMap.put(user.getId(), user);
         }
     }
 
@@ -92,7 +92,7 @@ public class UserController {
             UserCreateRespond userRespond = new UserCreateRespond();
             userRespond.user_id = userObj.user_id;
             userRespond.country = userObj.country;
-            userRespond.rank = BackendApplication.memory.indexMap.get(newUser.getId()) + 1;
+            userRespond.rank = BackendApplication.memory.getUsers().indexOf(newUser) + 1;
             userRespond.display_name = userObj.display_name;
             userRespond.points = userObj.points;
             response.setCode("200");
@@ -110,8 +110,8 @@ public class UserController {
     public @ResponseBody
     Response updateScore(@RequestBody ScoreRequestBody scoreBody) {
         Response response = new Response();
-        Integer index = BackendApplication.memory.indexMap.get(UUID.fromString(scoreBody.user_id));
-        if (index == null) {
+        User user = BackendApplication.memory.indexMap.get(UUID.fromString(scoreBody.user_id));
+        if (user == null) {
             response.setCode("500");
             response.setMessage("User not found.");
             return response;
@@ -180,20 +180,20 @@ public class UserController {
     public @ResponseBody
     Response getUserById(@PathVariable String id) {
         Response response = new Response();
-        Integer index = BackendApplication.memory.indexMap.get(UUID.fromString(id));
+        User user = BackendApplication.memory.indexMap.get(UUID.fromString(id));
 
-        if (index == null) {
+        if (user == null) {
             response.setCode("500");
             response.setMessage("User not found.");
             return response;
         }
 
-        User user = BackendApplication.memory.getUsers().get(index);
         UserProfileRespond profileRespond = new UserProfileRespond();
         profileRespond.user_id = user.getId();
         profileRespond.display_name = user.getDisplayName();
         profileRespond.points = user.getPoints();
-        profileRespond.rank = index + 1;
+        profileRespond.country = user.getCountry();
+        profileRespond.rank = BackendApplication.memory.getUsers().indexOf(user) + 1;
 
         response.setCode("200");
         response.setMessage("ok");

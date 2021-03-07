@@ -8,23 +8,17 @@ import java.util.*;
 public class MemoryRepo {
     private static final int USER_PER_PAGE = 10;
 
-    public HashMap<UUID, Integer> indexMap = new HashMap<>();
+    public Hashtable<UUID, User> indexMap = new Hashtable<>(200000);
     private List<User> users = Collections.synchronizedList(new LinkedList<>());
 
     public void addUser(User user) {
         users.add(user);
-        indexMap.put(user.getId(), users.size() - 1);
+        indexMap.put(user.getId(), user);
     }
 
     public void addUser(int index, User user) {
         users.add(index, user);
-        indexMap.put(user.getId(), index);
-    }
-
-    public void updateIndexMap(int startIndex, int stopIndex) {
-        for (int i = startIndex; i <= stopIndex; i++) {
-            indexMap.put(users.get(i).getId(), i);
-        }
+        indexMap.put(user.getId(), user);
     }
 
     public List<User> getUsers() {
@@ -33,8 +27,8 @@ public class MemoryRepo {
 
     public synchronized Response updatePointsOfUser(UUID userId, double gainedScore, UserController controllerClass) {
         Response response = new Response();
-        int index = indexMap.get(userId);
-        User user = users.get(index);
+        User user = indexMap.get(userId);
+        int index = users.indexOf(user);
         ScoreSubmitResponse scoreSubmitResponse = new ScoreSubmitResponse();
 
         if (gainedScore == 0) {
@@ -67,7 +61,6 @@ public class MemoryRepo {
             return response;
         }
         removeUser(index + 1);
-        updateIndexMap(newPosition, index);
 
         scoreSubmitResponse.user_id = userId.toString();
         scoreSubmitResponse.rank_change = index - newPosition;
@@ -121,7 +114,7 @@ public class MemoryRepo {
 
             User user = listForIterate.get(index++);
             Leaderboard leaderboardItem = new Leaderboard();
-            leaderboardItem.rank = indexMap.get(user.getId()) + 1;
+            leaderboardItem.rank = users.indexOf(user) + 1;
             leaderboardItem.points = user.getPoints();
             leaderboardItem.display_name = user.getDisplayName();
             leaderboardItem.country = user.getCountry();
@@ -151,10 +144,6 @@ public class MemoryRepo {
         }
 
         return userListByCounty;
-    }
-
-    public void removeUser(UUID userID) {
-        removeUser(indexMap.get(userID));
     }
 
     public void removeUser(int index) {
