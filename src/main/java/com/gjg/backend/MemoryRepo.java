@@ -146,6 +146,23 @@ public class MemoryRepo {
         return userListByCounty;
     }
 
+    public Response removeUser(UUID id, UserController controller) {
+        Response response = new Response();
+        User user = indexMap.get(id);
+        if (user == null) {
+            response.setCode("500");
+            response.setMessage("User not found");
+            return response;
+        }
+        Scanner.addTask(new Task(user, controller::removeUserFromDb, "Delete User"));
+        indexMap.remove(id);
+        removeUser(users.indexOf(user));
+
+        response.setCode("200");
+        response.setMessage("ok");
+        return response;
+    }
+
     public void removeUser(int index) {
         users.remove(index);
     }

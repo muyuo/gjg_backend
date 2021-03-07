@@ -2,7 +2,6 @@ package com.gjg.backend.controller;
 
 import com.github.javafaker.Faker;
 import com.gjg.backend.BackendApplication;
-import com.gjg.backend.Scanner;
 import com.gjg.backend.model.*;
 import com.gjg.backend.repository.UserRepository;
 import org.springframework.stereotype.Controller;
@@ -22,6 +21,10 @@ public class UserController {
 
     public void saveUserToDb(Object user) {
         userRepository.save((User) user);
+    }
+
+    public void removeUserFromDb(Object user) {
+        userRepository.delete((User) user);
     }
 
     @PostConstruct
@@ -95,6 +98,7 @@ public class UserController {
             userRespond.rank = BackendApplication.memory.getUsers().indexOf(newUser) + 1;
             userRespond.display_name = userObj.display_name;
             userRespond.points = userObj.points;
+
             response.setCode("200");
             response.setMessage("ok");
             response.setData(userRespond);
@@ -128,7 +132,7 @@ public class UserController {
         return response;
     }
 
-    @PostMapping("/user/seed")
+    @PostMapping("user/seed")
     public @ResponseBody
     Response seedUsers(@RequestBody UserSeedRequestBody seedRequestBody) {
         Response response = new Response();
@@ -147,7 +151,7 @@ public class UserController {
             user.setCountry(seedRequestBody.country);
             user.setDisplayName(faker.name().fullName());
 
-            while(userRepository.existsByDisplayName(user.getDisplayName())) {
+            while (userRepository.existsByDisplayName(user.getDisplayName())) {
                 user.setDisplayName(user.getDisplayName() + i);
             }
 
@@ -198,6 +202,22 @@ public class UserController {
         response.setCode("200");
         response.setMessage("ok");
         response.setData(profileRespond);
+        return response;
+    }
+
+    /*
+     *
+     * DELETE MAPPINGS
+     *
+     */
+
+    @DeleteMapping("user/remove")
+    public @ResponseBody
+    Response removeUser(@RequestBody UserRemoveRequest body) {
+        Response response;
+
+        response = BackendApplication.memory.removeUser(UUID.fromString(body.user_id), this);
+
         return response;
     }
 }
