@@ -11,11 +11,22 @@ public class MemoryRepo {
     public Hashtable<UUID, User> indexMap = new Hashtable<>(200000);
     private List<User> users = Collections.synchronizedList(new LinkedList<>());
 
+    /**
+     * Adds the user to end of the list.
+     *
+     * @param user
+     */
     public void addUser(User user) {
         users.add(user);
         indexMap.put(user.getId(), user);
     }
 
+    /**
+     * Adds the user to given index.
+     *
+     * @param index
+     * @param user
+     */
     public void addUser(int index, User user) {
         users.add(index, user);
         indexMap.put(user.getId(), user);
@@ -25,6 +36,14 @@ public class MemoryRepo {
         return users;
     }
 
+    /**
+     * Search the user with given userId and update his/her rank and points.
+     *
+     * @param userId id of a user
+     * @param gainedScore score value in double
+     * @param controllerClass UserController class where this method called from.
+     * @return
+     */
     public synchronized Response updatePointsOfUser(UUID userId, double gainedScore, UserController controllerClass) {
         Response response = new Response();
         User user = indexMap.get(userId);
@@ -72,6 +91,14 @@ public class MemoryRepo {
         return response;
     }
 
+    /**
+     * Binary search for user's new position in linkedList.
+     *
+     * @param topIndex Min index for search. Initial value must be 0.
+     * @param usersIndex Max index for search. Initial value is user's current index.
+     * @param user User who gained score.
+     * @return new index of user in linkedList.
+     */
     public int updateUserPosition(int topIndex, int usersIndex, User user) {
         if (usersIndex < topIndex) {
             addUser(topIndex, user);
